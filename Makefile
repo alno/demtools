@@ -1,15 +1,16 @@
-INSTALL_DIR=../
+INSTALL_DIR=/usr/local/bin/
 
 all: demtools 
 
 demtools:
-	g++ hillshade.cpp -lgdal -o hillshade
-	g++ color-relief.cxx -lgdal -o color-relief
-	g++ aspect.cpp -lgdal -o aspect
-	g++ slope.cpp -lgdal -o slope
+	g++ hillshade.cpp -lgdal -o bin/hillshade
+	g++ color-relief.cpp -lgdal -o bin/color-relief
+	g++ aspect.cpp -lgdal -o bin/aspect
+	g++ slope.cpp -lgdal -o bin/slope
 
 install:
-	cp slope aspect color-relief hillshade ${INSTALL_DIR}
+	cp bin/slope bin/aspect bin/color-relief bin/hillshade ${INSTALL_DIR}
 
 clean:
-	rm -f slope aspect color-relief hillshade
+	cd bin
+        rm -f slope aspect color-relief hillshade
