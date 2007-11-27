@@ -162,7 +162,7 @@ int main(int nArgc, char ** papszArgv)
                 } 
                 else 
                 {
-                    if (aspect <= 0.5 and aspect > 0) 
+                    if (aspect == 0) 
                         aspect = 360.0;
                     if (aspect <= 0)
                         aspect = 360.0 + aspect;

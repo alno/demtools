@@ -1,0 +1,39 @@
+#################
+# DEMTOOLS win32 makefile
+#
+#   source: http://www.perrygeo.net/wordpress/?p=7
+#
+#  authors: Chris Condit
+#           Jeff McKenna
+#
+#    notes: 1) add "using namespace std;" to stringtok.h
+#           2) aspect.cpp:165 should become:
+#                       if (aspect == 0)
+#################
+
+GDAL_ROOT = D:\build\mapserver-buildkit\gdal_1_4_2
+
+### END CONFIG ###
+
+MORE_LIBS =
+!INCLUDE $(GDAL_ROOT)\nmake.opt
+
+default: hillshade.exe slope.exe aspect.exe color-relief.exe
+
+clean:
+       del *.obj
+       del *.lib
+       del *.exe
+       del *.exp
+
+hillshade.exe: hillshade.cpp
+ $(CC) $(CFLAGS) $(XTRAFLAGS) hillshade.cpp $(XTRAOBJ) $(EXTERNAL_LIBS) $(GDAL_ROOT)\gdal.lib /link $(LINKER_FLAGS)
+
+slope.exe: slope.cpp
+ $(CC) $(CFLAGS) $(XTRAFLAGS) slope.cpp $(XTRAOBJ) $(EXTERNAL_LIBS) $(GDAL_ROOT)\gdal.lib /link $(LINKER_FLAGS)
+
+aspect.exe: aspect.cpp
+ $(CC) $(CFLAGS) $(XTRAFLAGS) aspect.cpp $(XTRAOBJ) $(EXTERNAL_LIBS) $(GDAL_ROOT)\gdal.lib /link $(LINKER_FLAGS)
+
+color-relief.exe: color-relief.cpp
+ $(CC) $(CFLAGS) $(XTRAFLAGS) /nodefaultlib:libc.lib color-relief.cpp $(MORE_LIBS) $(XTRAOBJ) $(EXTERNAL_LIBS) $(GDAL_ROOT)\gdal.lib /link $(LINKER_FLAGS)

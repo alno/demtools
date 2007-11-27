@@ -17,20 +17,20 @@ int main(int nArgc, char ** papszArgv)
     double      adfGeoTransform[6];
     float       *win;
     float       *shadeBuf;
-    float  	    x;
-    float		y;
+    float  	x;
+    float	y;
     float       aspect;
-    float		slope;
+    float	slope;
     float       cang;
     int         i;
     int         j;
     int         n;
     int         containsNull;
     const char *pszFormat = "GTiff";
-    float z = 1.0;
-    float scale = 1.0;
-    float az = 315.0;
-    float alt = 45.0;
+    float       z = 1.0;
+    float       scale = 1.0;
+    float       az = 315.0;
+    float       alt = 45.0;
 
     /* -----------------------------------
      * Parse Input Arguments

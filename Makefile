@@ -1,9 +1,3 @@
-######
-#
-# Makefile to install and build perrygeo repository
-#
-######
-
 CPP=g++
 GDAL_LIB=-lgdal
 
