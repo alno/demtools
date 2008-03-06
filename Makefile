@@ -1,10 +1,17 @@
+######
+#
+# Makefile to install and build demtools
+# Warning: check hardcoded paths
+#
+######
+
 CPP=g++
 GDAL_LIB=-lgdal
 
 default: compile
 
 compile:
-	@echo "Perrygeo compilation log"     
+	@echo "Demtools compilation ..."     
 	${CPP} hillshade.cpp ${GDAL_LIB} -o bin/hillshade
 	${CPP} color-relief.cpp ${GDAL_LIB} -o bin/color-relief
 	${CPP} aspect.cpp ${GDAL_LIB} -o bin/aspect

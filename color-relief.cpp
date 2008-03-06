@@ -2,8 +2,21 @@
 // color-relief.cxx
 // Author  : Paul Surgeon
 // Date    : 2005-12-22
-// License : Public Domain (free to do whatever you wish to with the code but
-//           I'm not responsible for anything unless it's something good)
+// License : 
+/*
+ Copyright 2005 Paul Surgeon
+ Licensed under the Apache License, Version 2.0 (the "License"); 
+ you may not use this file except in compliance with the License. 
+ You may obtain a copy of the License at 
+ 
+ http://www.apache.org/licenses/LICENSE-2.0 
+ 
+ Unless required by applicable law or agreed to in writing, software 
+ distributed under the License is distributed on an "AS IS" BASIS, 
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ See the License for the specific language governing permissions and 
+ limitations under the License.
+ */
 //
 // Calculates a color relief image from a gdal-supported raster DEM and a
 // color scale file.
