@@ -22,6 +22,9 @@
  * - handle missing transform, nullval, metadata
  * - write all metadata to output rasters
  * - progress meter
+ *
+ * References:
+ * Burrough, P.A. and McDonell, R.A., 1998. Principles of Geographical Information Systems. p. 190.
  ****************************************************************************/
 
 #include <iostream>
@@ -183,8 +186,8 @@ int main(int nArgc, char ** papszArgv)
                 dy = ((win[6] + win[7] + win[7] + win[8]) - 
                       (win[0] + win[1] + win[1] + win[2]));
 
-                key = ((dx/(2*cellsizeX*scale)) * (dx/(2*cellsizeX*scale))) + 
-                      ((dy/(2*cellsizeY*scale)) * (dy/(2*cellsizeY*scale)));
+                key = ((dx/(8*cellsizeX*scale)) * (dx/(8*cellsizeX*scale))) + 
+                      ((dy/(8*cellsizeY*scale)) * (dy/(8*cellsizeY*scale)));
 
                 slopePct = 100*sqrt(key);
                 if (slopeFormat == 1) 
