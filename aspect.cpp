@@ -16,6 +16,9 @@
  limitations under the License.
 
  * calculates aspect for a gdal-supported raster DEM
+ *
+ * References:
+ * Burrough, P.A. and McDonell, R.A., 1998. Principles of Geographical Information Systems. 
  ****************************************************************************/
 
 #include <iostream>
@@ -159,28 +162,32 @@ int main(int nArgc, char ** papszArgv)
             else 
             {
                 // We have a valid 3x3 window to compute aspect
-                dx = ((win[0] + win[3] + win[3] + win[6]) - 
-                      (win[2] + win[5] + win[5] + win[8]));
+
+                dx = ((win[2] + win[5] + win[5] + win[8]) -
+                      (win[0] + win[3] + win[3] + win[6]));
 
                 dy = ((win[6] + win[7] + win[7] + win[8]) - 
                       (win[0] + win[1] + win[1] + win[2]));
 
-                aspect = atan2(dy,dx) / degrees_to_radians;
+                aspect = atan2(dy/8.0,-1.0*dx/8.0) / degrees_to_radians;
 
                 if (dx == 0)
                 {
                     if (dy > 0) 
-                        aspect = 90.0;
+                        aspect = 0.0;
                     else 
-                        aspect = 270.0;
+                        aspect = 180.0;
                 } 
                 else 
                 {
-                    if (aspect == 0) 
-                        aspect = 360.0;
-                    if (aspect <= 0)
-                        aspect = 360.0 + aspect;
+                    if (aspect > 90.0) 
+                        aspect = 450.0 - aspect;
+                    else
+                        aspect = 90.0 - aspect;
                 }
+
+                if (aspect == 360.0) 
+                    aspect = 0.0;
            
                 aspectBuf[j] = aspect;
 
