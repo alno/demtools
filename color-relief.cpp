@@ -21,6 +21,10 @@
 // Calculates a color relief image from a gdal-supported raster DEM and a
 // color scale file.
 // Modified from hillshade.cpp by Matthew Perry
+//
+// CHANGELOG
+// - Updated nodata values to 0. RGB of 0,0,0 = null cell. This implies that 
+//   no true black can be used in color ramps.
 //=============================================================================
 
 #include <iostream>
@@ -195,7 +199,10 @@ int main(int argc, char* argv[])
     cout << "and the rest will be interpolated by color-relief." << endl;
     cout << "Example color scale file with 4000 meters set to white and 0 meters set to green:" << endl;
     cout << "4000 255 255 255" << endl;
-    cout << "0 0 255 0" << endl;
+    cout << "0 0 255 0" << endl << endl;
+    cout << "Using true black (0 0 0) as your RGB values will yield blank/null cells." << endl;
+    cout << "Note that to remove nodata from the output, set the DEM's nodata value to rgb of 0 0 0:" << endl;
+    cout << "-32767 0 0 0" << endl << endl;
     cout << "See the accompanying \"scale.txt\" file for a decent example." << endl;
     exit(1);
   }
@@ -241,11 +248,11 @@ int main(int argc, char* argv[])
   poDS->SetProjection(poDataset->GetProjectionRef());
 
   poBandRed = poDS->GetRasterBand(1);
-  poBandRed->SetNoDataValue(-1);
+  poBandRed->SetNoDataValue(0);
   poBandGreen = poDS->GetRasterBand(2);
-  poBandGreen->SetNoDataValue(-1);
+  poBandGreen->SetNoDataValue(0);
   poBandBlue = poDS->GetRasterBand(3);
-  poBandBlue->SetNoDataValue(-1);
+  poBandBlue->SetNoDataValue(0);
 
   // Run through each pixel in an image
   for (i = 0; i < nYSize; i++)
