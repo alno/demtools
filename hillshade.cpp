@@ -16,6 +16,9 @@
  limitations under the License.
 
  * calculates a shaded relief image from a gdal-supported raster DEM
+ 
+ CHANGELOG
+ * updated nodata handling so that 0 is nodata and 1 - 255 are the shade values
  ****************************************************************************/
 
 #include <iostream>
@@ -99,7 +102,8 @@ int main(int nArgc, char ** papszArgv)
     */
     const double   nsres = adfGeoTransform[5];
     const double   ewres = adfGeoTransform[1];
-    const float    nullValue = (float) poBand->GetNoDataValue( );
+    const float    inputNullValue = (float) poBand->GetNoDataValue( );
+    const float    nullValue = 0.0;
     const int      nXSize = poBand->GetXSize();
     const int      nYSize = poBand->GetYSize();
     shadeBuf       = (float *) CPLMalloc(sizeof(float)*nXSize);
@@ -119,7 +123,7 @@ int main(int nArgc, char ** papszArgv)
     poShadeDS->SetGeoTransform( adfGeoTransform );
     poShadeDS->SetProjection( poDataset->GetProjectionRef() );
     poShadeBand = poShadeDS->GetRasterBand(1);
-    poShadeBand->SetNoDataValue( poBand->GetNoDataValue( ) );
+    poShadeBand->SetNoDataValue( nullValue );
 
 
     /* ------------------------------------------
@@ -150,7 +154,7 @@ int main(int nArgc, char ** papszArgv)
 
             // Check if window has null value
             for ( n = 0; n <= 8; n++) {
-                if(win[n] == nullValue) {
+                if(win[n] == inputNullValue) {
                     containsNull = 1;
                     break;
                 }
@@ -186,10 +190,10 @@ int main(int nArgc, char ** papszArgv)
                        cos(alt*degreesToRadians) * cos(slope*degreesToRadians) *
                        cos((az-90.0)*degreesToRadians - aspect);
 
-                if (cang <= 0.0)
-                    cang = nullValue;
+                if (cang <= 0.0) 
+                    cang = 1.0;
                 else
-                    cang = 255.0 * cang;
+                    cang = 1.0 + (254.0 * cang);
 
                 shadeBuf[j] = cang;
 
