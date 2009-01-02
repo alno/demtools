@@ -90,6 +90,7 @@ int main(int nArgc, char ** papszArgv)
     const double cellsizeY = adfGeoTransform[5];
     const double cellsizeX = adfGeoTransform[1];
     const float nullValue = (float) poBand->GetNoDataValue( );
+    const float aspectNullValue = -9999.;
     const int   nXSize = poBand->GetXSize();
     const int   nYSize = poBand->GetYSize();
     aspectBuf    = (float *) CPLMalloc(sizeof(float)*nXSize); 
@@ -112,7 +113,7 @@ int main(int nArgc, char ** papszArgv)
     poAspectDS->SetGeoTransform( adfGeoTransform );    
     poAspectDS->SetProjection( poDataset->GetProjectionRef() );
     poAspectBand = poAspectDS->GetRasterBand(1);
-    poAspectBand->SetNoDataValue(-9999);   
+    poAspectBand->SetNoDataValue(aspectNullValue);   
 
 
     /* ------------------------------------------
@@ -175,8 +176,10 @@ int main(int nArgc, char ** papszArgv)
                 {
                     if (dy > 0) 
                         aspect = 0.0;
-                    else 
+                    else if (dy < 0)
                         aspect = 180.0;
+                    else
+                        aspect = aspectNullValue;
                 } 
                 else 
                 {
