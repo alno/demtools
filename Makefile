@@ -6,7 +6,7 @@
 ######
 
 CPP=g++
-GDAL_LIB=-lgdal
+GDAL_LIB=-lgdal1.7.0 -I /usr/include/gdal
 
 default: compile
 
