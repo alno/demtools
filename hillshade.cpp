@@ -36,6 +36,7 @@ int main(int nArgc, char ** papszArgv)
     float       *shadeBuf;
     float  	x;
     float	y;
+    float   s;
     float       aspect;
     float	slope;
     float       cang;
@@ -48,6 +49,8 @@ int main(int nArgc, char ** papszArgv)
     float       scale = 1.0;
     float       az = 315.0;
     float       alt = 45.0;
+    int         winDist = 1;
+    float       sharp = 2;
 
     /* -----------------------------------
      * Parse Input Arguments
@@ -58,7 +61,8 @@ int main(int nArgc, char ** papszArgv)
                 " Usage: \n"
                 "   hillshade input_dem output_hillshade \n"
                 "                 [-z ZFactor (default=1)] [-s scale* (default=1)] \n"
-                "                 [-az Azimuth (default=315)] [-alt Altitude (default=45)]\n\n"
+                "                 [-az Azimuth (default=315)] [-alt Altitude (default=45)]\n"
+                "                 [-wd Halfsize of window (default=1)] [-sh Sharpness coeff (default=2.0)]\n\n"
                 " Notes : \n"
                 "   Scale for Feet:Latlong use scale=370400, for Meters:LatLong use scale=111120 \n\n");
         exit(1);
@@ -80,6 +84,12 @@ int main(int nArgc, char ** papszArgv)
         if( EQUAL(papszArgv[iArg],"-alt") ||
                 EQUAL(papszArgv[iArg],"-altitude"))
             alt = atof(papszArgv[iArg+1]);
+        if( EQUAL(papszArgv[iArg],"-wd") ||
+                EQUAL(papszArgv[iArg],"-windist"))
+            winDist = atoi(papszArgv[iArg+1]);
+        if( EQUAL(papszArgv[iArg],"-sh") ||
+                EQUAL(papszArgv[iArg],"-sharpness"))
+            sharp = atof(papszArgv[iArg+1]);
     }
 
     GDALAllRegister();
@@ -97,6 +107,7 @@ int main(int nArgc, char ** papszArgv)
     poBand = poDataset->GetRasterBand( 1 );
     poDataset->GetGeoTransform( adfGeoTransform );
 
+    const int winSize = 2 * winDist + 1;
     /* -------------------------------------
     * Get variables from input dataset
     */
@@ -107,7 +118,7 @@ int main(int nArgc, char ** papszArgv)
     const int      nXSize = poBand->GetXSize();
     const int      nYSize = poBand->GetYSize();
     shadeBuf       = (float *) CPLMalloc(sizeof(float)*nXSize);
-    win            = (float *) CPLMalloc(sizeof(float)*9);
+    win            = (float *) CPLMalloc(sizeof(float)*winSize*winSize);
 
     /* -----------------------------------------
      * Create the output dataset and copy over relevant metadata
@@ -127,20 +138,15 @@ int main(int nArgc, char ** papszArgv)
 
 
     /* ------------------------------------------
-     * Move a 3x3 window over each cell 
-     * (where the cell in question is #4)
-     *
-     *                 0 1 2
-     *                 3 4 5
-     *                 6 7 8
-    *
+     * Move a SxS window over each cell
+     * (where the cell in question is (winSize + 1) * winDist)
      */
     for ( i = 0; i < nYSize; i++) {
         for ( j = 0; j < nXSize; j++) {
             containsNull = 0;
 
             // Exclude the edges
-            if (i == 0 || j == 0 || i == nYSize-1 || j == nXSize-1 )
+            if (i < winDist || j < winDist || i >= nYSize-winDist || j >= nXSize-winDist )
             {
                 // We are at the edge so write nullValue and move on
                 shadeBuf[j] = nullValue;
@@ -148,12 +154,12 @@ int main(int nArgc, char ** papszArgv)
             }
 
             // Read in 3x3 window
-            poBand->RasterIO( GF_Read, j-1, i-1, 3, 3,
-                              win, 3, 3, GDT_Float32,
+            poBand->RasterIO( GF_Read, j-winDist, i-winDist, winSize, winSize,
+                              win, winSize, winSize, GDT_Float32,
                               0, 0 );
 
             // Check if window has null value
-            for ( n = 0; n <= 8; n++) {
+            for ( n = 0; n < winSize*winSize; n++) {
                 if(win[n] == inputNullValue) {
                     containsNull = 1;
                     break;
@@ -165,20 +171,37 @@ int main(int nArgc, char ** papszArgv)
                 shadeBuf[j] = nullValue;
                 continue;
             } else {
-                // We have a valid 3x3 window.
+                // We have a valid SxS window.
 
                 /* ---------------------------------------
                 * Compute Hillshade
                 */
 
-                // First Slope ...
-                x = ((z*win[0] + z*win[3] + z*win[3] + z*win[6]) -
-                     (z*win[2] + z*win[5] + z*win[5] + z*win[8])) /
-                    (8.0 * ewres * scale);
+                x = 0;
+                y = 0;
+                s = 0;
 
-                y = ((z*win[6] + z*win[7] + z*win[7] + z*win[8]) -
-                     (z*win[0] + z*win[1] + z*win[1] + z*win[2])) /
-                    (8.0 * nsres * scale);
+                for (int i = 1; i <= winDist; ++ i) {
+                    const int wd = winDist;
+                    const int ws = winSize;
+
+                    for (int j = 1; j <= winDist; ++ j ) {
+                        double c = pow(sharp, 2*winDist - i - j);
+
+                        s += c * 4;
+                        x += (win[wd - i + (wd - j)*ws ] + win[wd - i + (wd + j)*ws] - win[wd + i + (wd - j)*ws] - win[wd + i + (wd + j)*ws]) * c;
+                        y += (win[wd - j + (wd + i)*ws ] + win[wd + j + (wd + i)*ws] - win[wd - j + (wd - i)*ws] - win[wd + j + (wd - i)*ws]) * c;
+                    }
+
+                    double c = pow(sharp, 2*winDist - i);
+
+                    s += c * 2;
+                    x += (win[wd - i + wd*ws ] - win[wd + i + wd*ws]) * c;
+                    y += (win[wd + (wd+i)*ws ] - win[wd + (wd-i)*ws]) * c;
+                }
+
+                x /= s * ewres * scale;
+                y /= s * nsres * scale;
 
                 slope = 90.0 - atan(sqrt(x*x + y*y))*radiansToDegrees;
 
