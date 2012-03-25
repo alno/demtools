@@ -7,9 +7,10 @@
 
 template <typename Container>
 void
-stringtok (Container &container, string const &in,
+stringtok (Container &container, std::string const &in,
            const char * const delimiters = " \t\n")
 {
+    using namespace std;
     const string::size_type len = in.length();
           string::size_type i = 0;
 
