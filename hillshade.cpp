@@ -202,6 +202,8 @@ int main(int nArgc, char ** papszArgv)
 
                 x /= s * ewres * scale;
                 y /= s * nsres * scale;
+                x *= z; // Scale by user-defined factor
+                y *= z; // Scale by user-defined factor
 
                 slope = 90.0 - atan(sqrt(x*x + y*y))*radiansToDegrees;
 
